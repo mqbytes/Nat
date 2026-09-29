@@ -1,0 +1,124 @@
+###############################################################################
+# 1. DHCP SERVER CONFIGURATION (UPDATED FOR secured.croft.systems)
+###############################################################################
+config system dhcp server
+    edit 10
+        set default-gateway 10.10.10.1
+        set netmask 255.255.255.0
+        set interface "VLAN10_MGMT"
+        config ip-range
+            edit 1
+                set start-ip 10.10.10.100
+                set end-ip 10.10.10.200
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "secured.croft.systems"
+    next
+    edit 20
+        set default-gateway 10.10.20.1
+        set netmask 255.255.255.0
+        set interface "VLAN20_CROFT"
+        config ip-range
+            edit 1
+                set start-ip 10.10.20.100
+                set end-ip 10.10.20.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "secured.croft.systems"
+    next
+    edit 30
+        set default-gateway 10.10.30.1
+        set netmask 255.255.255.0
+        set interface "VLAN30_ENERGY"
+        config ip-range
+            edit 1
+                set start-ip 10.10.30.100
+                set end-ip 10.10.30.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "secured.croft.systems"
+    next
+    edit 40
+        set default-gateway 10.10.40.1
+        set netmask 255.255.255.0
+        set interface "VLAN40_PSYSTEMS"
+        config ip-range
+            edit 1
+                set start-ip 10.10.40.100
+                set end-ip 10.10.40.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "secured.croft.systems"
+    next
+    edit 50
+        set default-gateway 10.10.50.1
+        set netmask 255.255.255.0
+        set interface "VLAN50_VOICE"
+        config ip-range
+            edit 1
+                set start-ip 10.10.50.100
+                set end-ip 10.10.50.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "secured.croft.systems"
+    next
+    edit 60
+        set default-gateway 10.10.60.1
+        set netmask 255.255.255.0
+        set interface "VLAN60_CCTV"
+        config ip-range
+            edit 1
+                set start-ip 10.10.60.100
+                set end-ip 10.10.60.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 1.1.1.1
+    next
+    edit 70
+        set default-gateway 10.10.70.1
+        set netmask 255.255.255.0
+        set interface "VLAN70_IOT"
+        config ip-range
+            edit 1
+                set start-ip 10.10.70.100
+                set end-ip 10.10.70.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 1.1.1.1
+    next
+    edit 90
+        set default-gateway 172.16.90.1
+        set netmask 255.255.255.0
+        set interface "VLAN90_GUEST"
+        config ip-range
+            edit 1
+                set start-ip 172.16.90.100
+                set end-ip 172.16.90.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 1.1.1.1
+        set dns-server2 8.8.8.8
+    next
+end
+
+###############################################################################
+# 2. UPDATED DNS FORWARDER SETTINGS ON FORTIGATE
+###############################################################################
+config system dns
+    set primary 1.1.1.1
+    set secondary 8.8.8.8
+    set domain "secured.croft.systems"
+end
