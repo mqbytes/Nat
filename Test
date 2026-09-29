@@ -122,3 +122,384 @@ config system dns
     set secondary 8.8.8.8
     set domain "secured.croft.systems"
 end
+
+###############################################################################
+# 1. TRAFFIC SHAPER (QoS FOR VOICE)
+###############################################################################
+config firewall traffic-shaper
+    edit "VoIP-High-Priority"
+        set guaranteed-bandwidth 5000
+        set maximum-bandwidth 20000
+        set priority high
+    next
+end
+
+###############################################################################
+# 2. VLAN INTERFACE CREATION
+###############################################################################
+config system interface
+    edit "VLAN10_MGMT"
+        set vdom "root"
+        set ip 10.10.10.1 255.255.255.0
+        set allowaccess ping https ssh
+        set interface "internal"
+        set vlanid 10
+        set role lan
+    next
+    edit "VLAN20_CROFT"
+        set vdom "root"
+        set ip 10.10.20.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 20
+        set role lan
+    next
+    edit "VLAN30_ENERGY"
+        set vdom "root"
+        set ip 10.10.30.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 30
+        set role lan
+    next
+    edit "VLAN40_PSYSTEMS"
+        set vdom "root"
+        set ip 10.10.40.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 40
+        set role lan
+    next
+    edit "VLAN50_VOICE"
+        set vdom "root"
+        set ip 10.10.50.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 50
+        set role lan
+    next
+    edit "VLAN60_CCTV"
+        set vdom "root"
+        set ip 10.10.60.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 60
+        set role lan
+    next
+    edit "VLAN70_IOT"
+        set vdom "root"
+        set ip 10.10.70.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 70
+        set role lan
+    next
+    edit "VLAN90_GUEST"
+        set vdom "root"
+        set ip 172.16.90.1 255.255.255.0
+        set allowaccess ping
+        set interface "internal"
+        set vlanid 90
+        set role lan
+    next
+end
+
+###############################################################################
+# 3. DHCP SERVER CONFIGURATION
+###############################################################################
+config system dhcp server
+    edit 10
+        set default-gateway 10.10.10.1
+        set netmask 255.255.255.0
+        set interface "VLAN10_MGMT"
+        config ip-range
+            edit 1
+                set start-ip 10.10.10.100
+                set end-ip 10.10.10.200
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "croft.local"
+    next
+    edit 20
+        set default-gateway 10.10.20.1
+        set netmask 255.255.255.0
+        set interface "VLAN20_CROFT"
+        config ip-range
+            edit 1
+                set start-ip 10.10.20.100
+                set end-ip 10.10.20.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "croft.local"
+    next
+    edit 30
+        set default-gateway 10.10.30.1
+        set netmask 255.255.255.0
+        set interface "VLAN30_ENERGY"
+        config ip-range
+            edit 1
+                set start-ip 10.10.30.100
+                set end-ip 10.10.30.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "energy.croft.local"
+    next
+    edit 40
+        set default-gateway 10.10.40.1
+        set netmask 255.255.255.0
+        set interface "VLAN40_PSYSTEMS"
+        config ip-range
+            edit 1
+                set start-ip 10.10.40.100
+                set end-ip 10.10.40.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 10.10.10.10
+        set domain "psystems.croft.local"
+    next
+    edit 50
+        set default-gateway 10.10.50.1
+        set netmask 255.255.255.0
+        set interface "VLAN50_VOICE"
+        config ip-range
+            edit 1
+                set start-ip 10.10.50.100
+                set end-ip 10.10.50.250
+            next
+        end
+        set dns-service default
+    next
+    edit 60
+        set default-gateway 10.10.60.1
+        set netmask 255.255.255.0
+        set interface "VLAN60_CCTV"
+        config ip-range
+            edit 1
+                set start-ip 10.10.60.100
+                set end-ip 10.10.60.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 1.1.1.1
+    next
+    edit 70
+        set default-gateway 10.10.70.1
+        set netmask 255.255.255.0
+        set interface "VLAN70_IOT"
+        config ip-range
+            edit 1
+                set start-ip 10.10.70.100
+                set end-ip 10.10.70.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 1.1.1.1
+    next
+    edit 90
+        set default-gateway 172.16.90.1
+        set netmask 255.255.255.0
+        set interface "VLAN90_GUEST"
+        config ip-range
+            edit 1
+                set start-ip 172.16.90.100
+                set end-ip 172.16.90.250
+            next
+        end
+        set dns-service specify
+        set dns-server1 1.1.1.1
+        set dns-server2 8.8.8.8
+    next
+end
+
+###############################################################################
+# 4. ADDRESS OBJECTS & GROUPS
+###############################################################################
+config firewall address
+    edit "NET_MGMT"
+        set subnet 10.10.10.0 255.255.255.0
+    next
+    edit "NET_CROFT"
+        set subnet 10.10.20.0 255.255.255.0
+    next
+    edit "NET_ENERGY"
+        set subnet 10.10.30.0 255.255.255.0
+    next
+    edit "NET_PSYSTEMS"
+        set subnet 10.10.40.0 255.255.255.0
+    next
+    edit "NET_VOICE"
+        set subnet 10.10.50.0 255.255.255.0
+    next
+    edit "NET_CCTV"
+        set subnet 10.10.60.0 255.255.255.0
+    next
+    edit "NET_IOT"
+        set subnet 10.10.70.0 255.255.255.0
+    next
+    edit "NET_GUEST"
+        set subnet 172.16.90.0 255.255.255.0
+    next
+    edit "HOST_AD_DC"
+        set subnet 10.10.10.10 255.255.255.255
+    next
+    edit "HOST_NVR"
+        set subnet 10.10.10.20 255.255.255.255
+    next
+    edit "RFC1918_10.0.0.0"
+        set subnet 10.0.0.0 255.0.0.0
+    next
+    edit "RFC1918_172.16.0.0"
+        set subnet 172.16.0.0 255.240.0.0
+    next
+    edit "RFC1918_192.168.0.0"
+        set subnet 192.168.0.0 255.255.0.0
+    next
+end
+
+config firewall addrgrp
+    edit "GRP_INTERNAL_CORPORATE"
+        set member "NET_MGMT" "NET_CROFT" "NET_ENERGY" "NET_PSYSTEMS"
+    next
+    edit "GRP_RFC1918_PRIVATE"
+        set member "RFC1918_10.0.0.0" "RFC1918_172.16.0.0" "RFC1918_192.168.0.0"
+    next
+end
+
+###############################################################################
+# 5. CUSTOM SERVICE DEFINITIONS FOR AD & VOIP
+###############################################################################
+config firewall service custom
+    edit "AD_Services"
+        set category "Network Services"
+        set tcp-portrange 88 135 389 445 636 3268-3269 49152-65535
+        set udp-portrange 88 123 389 464
+    next
+    edit "RTP_Voice"
+        set category "VoIP, Messaging & Other Applications"
+        set udp-portrange 10000-20000
+    next
+end
+
+###############################################################################
+# 6. FIREWALL POLICIES
+###############################################################################
+config firewall policy
+
+    # --- OUTBOUND INTERNET ACCESS RULES ---
+    edit 1
+        set name "Corporate_Internet_Out"
+        set srcintf "VLAN10_MGMT" "VLAN20_CROFT" "VLAN30_ENERGY" "VLAN40_PSYSTEMS"
+        set dstintf "wan1"
+        set srcaddr "GRP_INTERNAL_CORPORATE"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+        set nat enable
+    next
+
+    edit 2
+        set name "VoIP_Internet_Out_QoS"
+        set srcintf "VLAN50_VOICE"
+        set dstintf "wan1"
+        set srcaddr "NET_VOICE"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "SIP" "RTP_Voice"
+        set nat enable
+        set traffic-shaper "VoIP-High-Priority"
+    next
+
+    edit 3
+        set name "IoT_Internet_Out"
+        set srcintf "VLAN70_IOT"
+        set dstintf "wan1"
+        set srcaddr "NET_IOT"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "HTTP" "HTTPS" "DNS"
+        set nat enable
+    next
+
+    edit 4
+        set name "Guest_Internet_Out"
+        set srcintf "VLAN90_GUEST"
+        set dstintf "wan1"
+        set srcaddr "NET_GUEST"
+        set dstaddr "all"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+        set nat enable
+    next
+
+    # --- INTERNAL CROSS-VLAN ACCESS RULES ---
+    edit 10
+        set name "Allow_Corporate_to_ActiveDirectory"
+        set srcintf "VLAN20_CROFT" "VLAN30_ENERGY" "VLAN40_PSYSTEMS"
+        set dstintf "VLAN10_MGMT"
+        set srcaddr "NET_CROFT" "NET_ENERGY" "NET_PSYSTEMS"
+        set dstaddr "HOST_AD_DC"
+        set action accept
+        set schedule "always"
+        set service "AD_Services" "DNS" "PING"
+    next
+
+    edit 11
+        set name "Allow_CCTV_to_NVR_Storage"
+        set srcintf "VLAN60_CCTV"
+        set dstintf "VLAN10_MGMT"
+        set srcaddr "NET_CCTV"
+        set dstaddr "HOST_NVR"
+        set action accept
+        set schedule "always"
+        set service "ALL"
+    next
+
+    edit 12
+        set name "Allow_HQ_Admin_to_CCTV"
+        set srcintf "VLAN20_CROFT"
+        set dstintf "VLAN60_CCTV"
+        set srcaddr "NET_CROFT"
+        set dstaddr "NET_CCTV"
+        set action accept
+        set schedule "always"
+        set service "HTTP" "HTTPS" "PING"
+    next
+
+    # --- SECURITY ISOLATION RULES (EXPLICIT DENIES) ---
+    edit 98
+        set name "Block_IoT_to_Private_Networks"
+        set srcintf "VLAN70_IOT"
+        set dstintf "any"
+        set srcaddr "NET_IOT"
+        set dstaddr "GRP_RFC1918_PRIVATE"
+        set action deny
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+
+    edit 99
+        set name "Block_CCTV_Outbound_Internet"
+        set srcintf "VLAN60_CCTV"
+        set dstintf "wan1"
+        set srcaddr "NET_CCTV"
+        set dstaddr "all"
+        set action deny
+        set schedule "always"
+        set service "ALL"
+        set logtraffic all
+    next
+
+end
+
